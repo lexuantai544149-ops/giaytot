@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1058192080461",
+    "project_id": "giaytot-5a49c",
+    "storage_bucket": "giaytot-5a49c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1058192080461:android:29145ea3eef853dbdaa604",
+        "android_client_info": {
+          "package_name": "com.example.giaytot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNgHqcmMliKnpEq7vpMqZ43u-Lm8qSc5I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
