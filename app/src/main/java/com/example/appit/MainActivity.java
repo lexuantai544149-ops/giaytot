@@ -32,13 +32,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
-    private RecyclerView recyclerView; // SỬA: Đổi từ GridView sang RecyclerView
+    private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    private List<Product> productList; // List for display
-    private List<Product> fullProductList; // Master list
+    private List<Product> productList;
+    private List<Product> fullProductList;
     private GridAdapter adapter;
+    private TextView cartBadgeTextView; // Biến cho badge
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,9 +53,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupDrawer();
         updateNavHeader();
 
-        // --- SỬA: Thiết lập RecyclerView ---
-        recyclerView = findViewById(R.id.product_recycler_view); // ID mới từ content_main.xml
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // Tạo lưới 2 cột
+        recyclerView = findViewById(R.id.product_recycler_view);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         
         productList = new ArrayList<>();
         fullProductList = new ArrayList<>();
@@ -62,8 +62,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         recyclerView.setAdapter(adapter);
 
         loadProducts();
+    }
 
-        // Logic click đã được chuyển vào trong Adapter
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Cập nhật badge mỗi khi quay lại màn hình chính
+        if (cartBadgeTextView != null) {
+            updateCartBadge();
+        }
     }
 
     private void setupToolbar() {
@@ -126,6 +133,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        
+        // --- Thiết lập Badge cho giỏ hàng ---
+        final MenuItem cartItem = menu.findItem(R.id.action_cart);
+        View actionView = cartItem.getActionView();
+        cartBadgeTextView = actionView.findViewById(R.id.cart_badge);
+
+        actionView.setOnClickListener(v -> onOptionsItemSelected(cartItem));
+
+        updateCartBadge();
+        // -------------------------------------
+
         MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) searchItem.getActionView();
 
@@ -144,6 +162,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         return true;
+    }
+
+    public void updateCartBadge() {
+        int totalItemCount = CartManager.getInstance().getTotalItemCount();
+        if (cartBadgeTextView != null) {
+            if (totalItemCount > 0) {
+                cartBadgeTextView.setText(String.valueOf(totalItemCount));
+                cartBadgeTextView.setVisibility(View.VISIBLE);
+            } else {
+                cartBadgeTextView.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void updateNavHeader() {

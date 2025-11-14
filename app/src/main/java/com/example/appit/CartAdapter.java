@@ -16,10 +16,10 @@ import java.util.List;
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
     private final Context context;
-    private final List<Product> cartItems;
+    private final List<CartItem> cartItems;
     private final CartManager cartManager = CartManager.getInstance();
 
-    public CartAdapter(Context context, List<Product> cartItems) {
+    public CartAdapter(Context context, List<CartItem> cartItems) {
         this.context = context;
         this.cartItems = cartItems;
     }
@@ -33,10 +33,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        Product product = cartItems.get(position);
+        CartItem cartItem = cartItems.get(position);
+        Product product = cartItem.getProduct();
 
         holder.name.setText(product.getTitle());
-        holder.price.setText(product.getPrice() + " VND");
+        holder.price.setText(product.getPrice());
+        holder.quantity.setText("Số lượng: " + cartItem.getQuantity());
 
         Glide.with(context)
                 .load(product.getThumbnail())
@@ -45,13 +47,23 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.removeButton.setOnClickListener(v -> {
             int currentPosition = holder.getAdapterPosition();
             if (currentPosition != RecyclerView.NO_POSITION) {
-                Product productToRemove = cartItems.get(currentPosition);
-                cartManager.removeProduct(productToRemove);
+                CartItem itemToRemove = cartItems.get(currentPosition);
+                cartManager.removeProduct(itemToRemove.getProduct());
                 notifyItemRemoved(currentPosition);
-                // This is a simple way to update total, a better way is with an interface
+                notifyItemRangeChanged(currentPosition, cartItems.size());
+                
+                // Cập nhật lại tổng tiền và badge trên MainActivity
                 if (context instanceof CartActivity) {
                     ((CartActivity) context).updateTotalPrice();
                 }
+                if (context instanceof OrderActivity) {
+                    // Không cần làm gì ở màn hình hóa đơn
+                } else {
+                     // Cập nhật badge ở MainActivity
+                    if(context instanceof MainActivity) {
+                       ((MainActivity) context).updateCartBadge();
+                    }    
+                } 
             }
         });
     }
@@ -63,7 +75,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     static class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView image;
-        TextView name, price;
+        TextView name, price, quantity;
         ImageButton removeButton;
 
         public CartViewHolder(@NonNull View itemView) {
@@ -71,6 +83,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             image = itemView.findViewById(R.id.cart_item_image);
             name = itemView.findViewById(R.id.cart_item_name);
             price = itemView.findViewById(R.id.cart_item_price);
+            quantity = itemView.findViewById(R.id.cart_item_quantity);
             removeButton = itemView.findViewById(R.id.btn_remove_from_cart);
         }
     }

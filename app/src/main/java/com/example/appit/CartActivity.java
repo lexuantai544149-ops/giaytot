@@ -1,5 +1,6 @@
 package com.example.appit;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.UUID;
 
 public class CartActivity extends AppCompatActivity {
 
@@ -36,32 +38,50 @@ public class CartActivity extends AppCompatActivity {
         // --- Setup Views ---
         recyclerView = findViewById(R.id.cart_recycler_view);
         totalPriceTextView = findViewById(R.id.cart_total_price);
-        Button checkoutButton = findViewById(R.id.btn_checkout);
+        Button btnProceedToPayment = findViewById(R.id.btn_proceed_to_payment);
 
         // --- Setup RecyclerView ---
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CartAdapter(this, cartManager.getCartItems());
+        // SỬA: Truyền đúng List<CartItem>
+        adapter = new CartAdapter(this, cartManager.getCartItems()); 
         recyclerView.setAdapter(adapter);
 
-        // --- Initial Price Update ---
         updateTotalPrice();
 
-        // --- Checkout Button ---
-        checkoutButton.setOnClickListener(v -> {
-            Toast.makeText(this, "Chức năng đang được phát triển", Toast.LENGTH_SHORT).show();
+        // --- Proceed to Payment Button ---
+        btnProceedToPayment.setOnClickListener(v -> {
+            double totalAmount = cartManager.calculateTotalPrice();
+            if (totalAmount == 0) {
+                Toast.makeText(this, "Giỏ hàng của bạn đang trống", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String orderId = UUID.randomUUID().toString();
+
+            Intent intent = new Intent(this, QrPaymentActivity.class);
+            intent.putExtra("TOTAL_AMOUNT", totalAmount);
+            intent.putExtra("ORDER_ID", orderId);
+            startActivity(intent);
         });
+    }
+
+    // Cập nhật lại giỏ hàng mỗi khi quay lại màn hình này
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adapter.notifyDataSetChanged();
+        updateTotalPrice();
     }
 
     public void updateTotalPrice() {
         double totalPrice = cartManager.calculateTotalPrice();
-        // Format price to be more readable
         NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         totalPriceTextView.setText(format.format(totalPrice));
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed(); // Go back to previous activity
+        onBackPressed();
         return true;
     }
 }

@@ -48,4 +48,12 @@ dependencies {
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    // QR Code Generator
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // Animation Library
+    implementation("com.airbnb.android:lottie:5.2.0")
+
+    // MoMo SDK is removed for local simulation
 }

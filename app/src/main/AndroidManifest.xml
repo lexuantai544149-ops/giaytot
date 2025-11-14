@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Thêm quyền truy cập Internet cho Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -16,7 +15,6 @@
         android:theme="@style/Theme.Appit"
         tools:targetApi="31">
 
-        <!-- Đổi Activity khởi chạy thành LoginActivity -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -26,27 +24,34 @@
             </intent-filter>
         </activity>
 
-        <!-- Khai báo MainActivity (không còn là launcher) -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true" />
+        <activity android:name=".MainActivity" android:exported="true" />
+        <activity android:name=".RegisterActivity" android:exported="false" />
+        <activity android:name=".ProductDetailActivity" android:exported="false" android:parentActivityName=".MainActivity" />
+        <activity android:name=".CartActivity" android:exported="false" android:parentActivityName=".MainActivity" />
+        <activity android:name=".ProfileActivity" android:exported="false" android:parentActivityName=".MainActivity" />
+        <activity android:name=".OrderActivity" android:exported="false" android:parentActivityName=".CartActivity" />
 
+        <!-- Payment Flow Activities -->
         <activity
-            android:name=".RegisterActivity"
+            android:name=".QrPaymentActivity"
             android:exported="false" />
         <activity
-            android:name=".ProductDetailActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" /> <!-- Thêm parent để nút back hoạt động -->
+            android:name=".PaymentSuccessActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity
-            android:name=".CartActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".ProfileActivity"
-            android:exported="false"
-            android:parentActivityName=".MainActivity" />
+            <!-- Deep link để nhận kết quả thanh toán từ QR -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="myapp"
+                    android:host="payment"
+                    android:path="/success" />
+            </intent-filter>
+
+        </activity>
 
     </application>
 

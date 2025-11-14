@@ -11,9 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
 
 public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ProductViewHolder> {
 
@@ -37,7 +35,9 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ProductViewHol
         Product product = productList.get(position);
 
         holder.nameView.setText(product.getTitle());
-        holder.priceView.setText(product.getPrice() + " VND");
+
+        // SỬA LỖI: price bây giờ là String, hiển thị trực tiếp
+        holder.priceView.setText(product.getPrice());
 
         Glide.with(context)
                 .load(product.getThumbnail())

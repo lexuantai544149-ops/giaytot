@@ -11,7 +11,8 @@
 
     <item
         android:id="@+id/action_cart"
-        android:icon="@drawable/ic_cart"
         android:title="Giỏ hàng"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        app:actionLayout="@layout/cart_action_item_layout" />
+
 </menu>

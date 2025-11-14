@@ -16,9 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Thêm kho lưu trữ JitPack cho MoMo SDK
+        maven { url = uri("https://jitpack.io") }
     }
 }
 
 rootProject.name = "appit"
 include(":app")
- 

@@ -1,12 +1,13 @@
 package com.example.appit;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class CartManager {
 
     private static CartManager instance;
-    private final List<Product> cartItems = new ArrayList<>();
+    private final List<CartItem> cartItems = new ArrayList<>();
 
     private CartManager() {}
 
@@ -18,14 +19,32 @@ public class CartManager {
     }
 
     public void addProduct(Product product) {
-        cartItems.add(product);
+        // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+        for (CartItem item : cartItems) {
+            if (item.getProduct().getId().equals(product.getId())) {
+                // Nếu có, chỉ tăng số lượng
+                item.incrementQuantity();
+                return; // Kết thúc
+            }
+        }
+        // Nếu chưa có, thêm một món hàng mới vào giỏ
+        cartItems.add(new CartItem(product));
     }
 
     public void removeProduct(Product product) {
-        cartItems.remove(product);
+        // Dùng Iterator để tránh lỗi ConcurrentModificationException khi xóa
+        Iterator<CartItem> iterator = cartItems.iterator();
+        while (iterator.hasNext()) {
+            CartItem item = iterator.next();
+            if (item.getProduct().getId().equals(product.getId())) {
+                iterator.remove();
+                return;
+            }
+        }
     }
 
-    public List<Product> getCartItems() {
+    // Trả về danh sách các CartItem
+    public List<CartItem> getCartItems() {
         return cartItems;
     }
 
@@ -33,15 +52,24 @@ public class CartManager {
         cartItems.clear();
     }
 
+    // Tính tổng số lượng tất cả các sản phẩm (để hiển thị trên badge)
+    public int getTotalItemCount() {
+        int totalCount = 0;
+        for (CartItem item : cartItems) {
+            totalCount += item.getQuantity();
+        }
+        return totalCount;
+    }
+
     public double calculateTotalPrice() {
         double total = 0;
-        for (Product product : cartItems) {
+        for (CartItem item : cartItems) {
             try {
-                // SỬA LỖI: Loại bỏ tất cả các ký tự không phải là số
-                String priceString = product.getPrice().replaceAll("\\D", "");
-                total += Double.parseDouble(priceString);
+                String priceString = item.getProduct().getPrice().replaceAll("[^\\d]", "");
+                double price = Double.parseDouble(priceString);
+                // Nhân giá với số lượng
+                total += price * item.getQuantity();
             } catch (NumberFormatException e) {
-                // Bỏ qua sản phẩm nếu giá không hợp lệ
                 e.printStackTrace();
             }
         }
