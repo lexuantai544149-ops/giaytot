@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme for dark mode. -->
-    <style name="Theme.Giaytot" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Appit" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Kế thừa từ theme chính và ghi đè màu sắc cho chế độ tối -->
 
         <!-- Màu chính của theme -->

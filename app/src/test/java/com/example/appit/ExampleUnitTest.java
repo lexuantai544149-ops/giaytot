@@ -1,4 +1,4 @@
-package com.example.giaytot;
+package com.example.appit;
 
 import org.junit.Test;
 

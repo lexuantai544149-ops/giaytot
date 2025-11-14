@@ -1,4 +1,4 @@
-package com.example.giaytot;
+package com.example.appit;
 
 import android.content.Intent;
 import android.os.Bundle;

@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "giaytot"
+rootProject.name = "appit"
 include(":app")
  
