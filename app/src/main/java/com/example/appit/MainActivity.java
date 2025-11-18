@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.widget.SearchView;
@@ -18,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -32,13 +34,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
-    private RecyclerView recyclerView; // SỬA: Đổi từ GridView sang RecyclerView
+    private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    private List<Product> productList; // List for display
-    private List<Product> fullProductList; // Master list
+    private List<Product> productList;
+    private List<Product> fullProductList;
     private GridAdapter adapter;
+    private SearchView searchView;
+    private TextView cartBadgeTextView;
+
+    private String currentSearchQuery = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,19 +57,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupToolbar();
         setupDrawer();
         updateNavHeader();
-
-        // --- SỬA: Thiết lập RecyclerView ---
-        recyclerView = findViewById(R.id.product_recycler_view); // ID mới từ content_main.xml
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // Tạo lưới 2 cột
-        
-        productList = new ArrayList<>();
-        fullProductList = new ArrayList<>();
-        adapter = new GridAdapter(this, productList);
-        recyclerView.setAdapter(adapter);
+        setupRecyclerView();
 
         loadProducts();
+    }
 
-        // Logic click đã được chuyển vào trong Adapter
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCartBadge();
+        updateNavHeader(); // Cập nhật lại header khi quay lại
     }
 
     private void setupToolbar() {
@@ -81,6 +84,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toggle.syncState();
     }
 
+    private void setupRecyclerView() {
+        recyclerView = findViewById(R.id.product_recycler_view);
+        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        productList = new ArrayList<>();
+        fullProductList = new ArrayList<>();
+        adapter = new GridAdapter(this, productList);
+        recyclerView.setAdapter(adapter);
+    }
+
     private void loadProducts() {
         db.collection("products")
                 .get()
@@ -89,34 +101,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         fullProductList.clear();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Product product = document.toObject(Product.class);
-                            product.setId(document.getId());
+                            product.setDocumentId(document.getId());
                             fullProductList.add(product);
                         }
-                        filter("");
+                        filterProducts();
                     } else {
                         Toast.makeText(MainActivity.this, "Error loading products.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void filter(String query) {
+    private void filterProducts() {
         productList.clear();
-        if (query.isEmpty()) {
+        if (currentSearchQuery.isEmpty()) {
             productList.addAll(fullProductList);
         } else {
-            String lowerCaseQuery = query.toLowerCase();
+            String lowerCaseQuery = currentSearchQuery.toLowerCase();
             for (Product product : fullProductList) {
-                if (product.getTitle().toLowerCase().contains(lowerCaseQuery)) {
+                boolean titleMatches = product.getTitle().toLowerCase().contains(lowerCaseQuery);
+                boolean tagsMatch = product.getTags() != null && product.getTags().toString().toLowerCase().contains(lowerCaseQuery);
+                if (titleMatches || tagsMatch) {
                     productList.add(product);
-                    continue;
-                }
-                if (product.getTags() != null) {
-                    for (String tag : product.getTags()) {
-                        if (tag.toLowerCase().contains(lowerCaseQuery)) {
-                            productList.add(product);
-                            break;
-                        }
-                    }
                 }
             }
         }
@@ -126,19 +131,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-        MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
+        
+        MenuItem cartItem = menu.findItem(R.id.action_cart);
+        View actionView = cartItem.getActionView();
+        if (actionView != null) {
+            cartBadgeTextView = actionView.findViewById(R.id.cart_badge);
+            actionView.setOnClickListener(v -> onOptionsItemSelected(cartItem));
+        }
 
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchItem.getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                filter(query);
+                currentSearchQuery = query;
+                filterProducts();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                filter(newText);
+                currentSearchQuery = newText;
+                filterProducts();
                 return true;
             }
         });
@@ -146,14 +160,52 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    private void updateCartBadge() {
+        if (cartBadgeTextView == null) return;
+        int cartItemCount = CartManager.getInstance().getCartItems().size();
+        if (cartItemCount > 0) {
+            cartBadgeTextView.setVisibility(View.VISIBLE);
+            cartBadgeTextView.setText(String.valueOf(cartItemCount));
+        } else {
+            cartBadgeTextView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_cart) {
+            startActivity(new Intent(this, CartActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void updateNavHeader() {
         View headerView = navigationView.getHeaderView(0);
-        TextView navHeaderEmail = headerView.findViewById(R.id.nav_header_email);
+        TextView navUserName = headerView.findViewById(R.id.nav_user_name);
+        TextView navUserEmail = headerView.findViewById(R.id.nav_user_email);
+        ImageView navProfileImage = headerView.findViewById(R.id.nav_profile_image);
+
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            navHeaderEmail.setText(currentUser.getEmail());
+            navUserEmail.setText(currentUser.getEmail());
+            db.collection("users").document(currentUser.getUid()).get().addOnSuccessListener(doc -> {
+                if(doc.exists()) {
+                    User user = doc.toObject(User.class);
+                    if (user != null) { // SỬA LỖI Ở ĐÂY
+                        navUserName.setText(user.getDisplayName());
+                        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+                            Glide.with(this).load(user.getProfileImageUrl()).into(navProfileImage);
+                        } else {
+                            navProfileImage.setImageResource(R.drawable.ic_default_profile);
+                        }
+                    }
+                }
+            });
         } else {
-            navHeaderEmail.setText("Vui lòng đăng nhập");
+            navUserName.setText("Appit Store");
+            navUserEmail.setText("");
+            navProfileImage.setImageResource(R.drawable.ic_default_profile);
         }
     }
 
@@ -161,26 +213,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (searchView != null && !searchView.isIconified()) {
+            searchView.setIconified(true);
         } else {
             super.onBackPressed();
         }
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_cart) {
-            startActivity(new Intent(this, CartActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_home) {
-            // Already home
+        } else if (id == R.id.nav_filter) {
+            startActivity(new Intent(this, FilterActivity.class));
         } else if (id == R.id.nav_cart) {
             startActivity(new Intent(this, CartActivity.class));
         } else if (id == R.id.nav_profile) {
@@ -195,7 +240,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void logoutUser() {
         mAuth.signOut();
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        CartManager.getInstance().clearCartOnLogout();
+        Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();

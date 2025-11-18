@@ -46,7 +46,8 @@ public class GridAdapter extends RecyclerView.Adapter<GridAdapter.ProductViewHol
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ProductDetailActivity.class);
-            intent.putExtra("PRODUCT_ID", product.getId());
+            // SỬA LỖI: Gửi đi Document ID thay vì ID số
+            intent.putExtra("PRODUCT_ID", product.getDocumentId()); 
             context.startActivity(intent);
         });
     }

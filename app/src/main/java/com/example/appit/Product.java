@@ -6,9 +6,12 @@ import java.util.List;
 public class Product {
 
     @Exclude
-    private String id; // Firestore Document ID
+    private String documentId; // Firestore Document ID
+    @Exclude
+    private boolean isSelected = true; 
 
-    // --- Các trường chính ---
+    // --- Main Fields ---
+    private int id; // The numerical ID from your data
     private String title;
     private String description;
     private String price;
@@ -20,7 +23,7 @@ public class Product {
     private String thumbnail;
     private List<String> images;
 
-    // --- Các trường thông tin khác ---
+    // --- Other Info ---
     private String warrantyInformation;
     private String shippingInformation;
     private String availabilityStatus;
@@ -29,14 +32,20 @@ public class Product {
     private Dimensions dimensions;
     private List<Review> reviews;
 
-    // Constructor rỗng cần thiết cho Firestore
     public Product() {}
 
     // --- Getters and Setters ---
 
     @Exclude
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
+    public String getDocumentId() { return documentId; }
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
+
+    @Exclude
+    public boolean isSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -89,38 +98,25 @@ public class Product {
     public List<Review> getReviews() { return reviews; }
     public void setReviews(List<Review> reviews) { this.reviews = reviews; }
 
-    // --- Lớp con cho Dimensions ---
     public static class Dimensions {
-        private double width;
-        private double height;
-        private double depth;
-
+        private double width, height, depth;
         public Dimensions() {}
-
         public double getWidth() { return width; }
         public void setWidth(double width) { this.width = width; }
-
         public double getHeight() { return height; }
         public void setHeight(double height) { this.height = height; }
-
         public double getDepth() { return depth; }
         public void setDepth(double depth) { this.depth = depth; }
     }
 
-    // --- Lớp con cho Review ---
     public static class Review {
         private int rating;
-        private String comment;
-        private String reviewerName;
-
+        private String comment, reviewerName;
         public Review() {}
-
         public int getRating() { return rating; }
         public void setRating(int rating) { this.rating = rating; }
-
         public String getComment() { return comment; }
         public void setComment(String comment) { this.comment = comment; }
-
         public String getReviewerName() { return reviewerName; }
         public void setReviewerName(String reviewerName) { this.reviewerName = reviewerName; }
     }

@@ -18,50 +18,64 @@ public class CartActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private CartAdapter adapter;
     private TextView totalPriceTextView;
-    private CartManager cartManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
 
-        cartManager = CartManager.getInstance();
+        setupToolbar();
+        setupViews();
+        loadCart();
 
-        // --- Setup Toolbar ---
-        Toolbar toolbar = findViewById(R.id.cart_toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Giỏ hàng");
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-        // --- Setup Views ---
-        recyclerView = findViewById(R.id.cart_recycler_view);
-        totalPriceTextView = findViewById(R.id.cart_total_price);
         Button checkoutButton = findViewById(R.id.btn_checkout);
-
-        // --- Setup RecyclerView ---
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new CartAdapter(this, cartManager.getCartItems());
-        recyclerView.setAdapter(adapter);
-
-        // --- Initial Price Update ---
-        updateTotalPrice();
-
-        // --- Checkout Button ---
         checkoutButton.setOnClickListener(v -> {
             Toast.makeText(this, "Chức năng đang được phát triển", Toast.LENGTH_SHORT).show();
         });
     }
 
+    private void setupToolbar() {
+        Toolbar toolbar = findViewById(R.id.cart_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Giỏ hàng");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void setupViews() {
+        recyclerView = findViewById(R.id.cart_recycler_view);
+        totalPriceTextView = findViewById(R.id.cart_total_price);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void loadCart() {
+        CartManager.getInstance().loadCartFromFirebase(new CartManager.CartListener() {
+            @Override
+            public void onCartUpdated() {
+                if(adapter == null) {
+                    adapter = new CartAdapter(CartActivity.this, CartManager.getInstance().getCartItems());
+                    recyclerView.setAdapter(adapter);
+                } else {
+                    adapter.notifyDataSetChanged();
+                }
+                updateTotalPrice();
+            }
+
+            @Override
+            public void onError(String message) {
+                Toast.makeText(CartActivity.this, "Lỗi tải giỏ hàng: " + message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void updateTotalPrice() {
-        double totalPrice = cartManager.calculateTotalPrice();
-        // Format price to be more readable
+        double totalPrice = CartManager.getInstance().calculateTotalPrice();
         NumberFormat format = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         totalPriceTextView.setText(format.format(totalPrice));
     }
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed(); // Go back to previous activity
+        onBackPressed();
         return true;
     }
 }

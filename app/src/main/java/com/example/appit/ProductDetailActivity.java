@@ -1,6 +1,7 @@
 package com.example.appit;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,6 +24,7 @@ public class ProductDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_product_detail);
+        Log.d("ProductDetailActivity", "onCreate called");
 
         db = FirebaseFirestore.getInstance();
 
@@ -33,8 +35,17 @@ public class ProductDetailActivity extends AppCompatActivity {
         Button btnAddToCart = findViewById(R.id.btnAddToCart);
         btnAddToCart.setOnClickListener(v -> {
             if (currentProduct != null) {
-                CartManager.getInstance().addProduct(currentProduct);
-                Toast.makeText(this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                CartManager.getInstance().addProductToCart(currentProduct, new CartManager.CartListener() {
+                    @Override
+                    public void onCartUpdated() {
+                        Toast.makeText(ProductDetailActivity.this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(ProductDetailActivity.this, "Lỗi: " + message, Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
@@ -57,7 +68,7 @@ public class ProductDetailActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         currentProduct = documentSnapshot.toObject(Product.class);
                         if (currentProduct != null) {
-                            currentProduct.setId(documentSnapshot.getId()); // Don't forget to set the ID
+                            currentProduct.setDocumentId(documentSnapshot.getId()); // SỬA: Gán Document ID
                             populateUI(currentProduct);
                         }
                     } else {
@@ -114,5 +125,42 @@ public class ProductDetailActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    // Lifecycle Methods
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("ProductDetailActivity", "onStart called");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("ProductDetailActivity", "onResume called");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("ProductDetailActivity", "onPause called");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("ProductDetailActivity", "onStop called");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("ProductDetailActivity", "onDestroy called");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d("ProductDetailActivity", "onRestart called");
     }
 }

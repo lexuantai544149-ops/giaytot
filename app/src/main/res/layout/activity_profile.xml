@@ -1,36 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:background="@color/dark_background">
+    android:background="@color/app_background">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Tài Khoản Của Bạn"
-        android:textSize="24sp"
-        android:textColor="@color/dark_text_primary"
-        android:textStyle="bold"/>
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/profile_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface"
+        app:title="Tài khoản của tôi" />
 
-    <TextView
-        android:id="@+id/profile_email"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="email@example.com"
-        android:textSize="18sp"
-        android:textColor="@color/dark_text_secondary"
-        android:layout_marginTop="16dp"/>
-
-    <Button
-        android:id="@+id/btn_logout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đăng xuất"
-        android:background="@drawable/button_background"
-        android:textColor="@color/black"
-        android:layout_marginTop="32dp"/>
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="16dp">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/profile_image"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/ic_default_profile"
+                app:civ_border_width="2dp"
+                app:civ_border_color="@color/accent"/>
+
+            <ImageButton
+                android:id="@+id/btn_edit_profile_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_edit"
+                android:background="@drawable/badge_background"
+                android:layout_gravity="bottom|end"/>
+
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/profile_name_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Tên hiển thị"
+            android:inputType="textPersonName"
+            android:enabled="false"/>
+
+        <ImageButton
+            android:id="@+id/btn_edit_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit_grey"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_gravity="end|center_vertical"/>
+    </FrameLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp">
+
+        <EditText
+            android:id="@+id/profile_phone_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Số điện thoại"
+            android:inputType="phone"
+            android:enabled="false"/>
+
+        <ImageButton
+            android:id="@+id/btn_edit_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit_grey"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:layout_gravity="end|center_vertical"/>
+    </FrameLayout>
+
+    <TextView
+        style="@style/DetailHeader"
+        android:layout_marginStart="16dp"
+        android:text="Sổ địa chỉ" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/address_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_save_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="16dp"
+            android:text="Lưu thay đổi" />
+
+        <Button
+            android:id="@+id/btn_logout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_margin="16dp"
+            android:text="Đăng xuất" />
+    </LinearLayout>
 
 </LinearLayout>
