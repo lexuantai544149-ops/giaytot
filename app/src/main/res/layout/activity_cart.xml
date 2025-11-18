@@ -47,10 +47,10 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btn_checkout"
+        android:id="@+id/btn_proceed_to_payment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="Thanh toán" />
+        android:text="Tiến hành thanh toán"
+        android:layout_margin="16dp"/>
 
 </LinearLayout>

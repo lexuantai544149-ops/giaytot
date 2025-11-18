@@ -14,7 +14,7 @@ public class Product {
     private int id; // The numerical ID from your data
     private String title;
     private String description;
-    private String price;
+    private String price; // SỬA LỖI: Trả về kiểu String để khớp với Firestore
     private double discountPercentage;
     private double rating;
     private int stock;
@@ -53,8 +53,8 @@ public class Product {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getPrice() { return price; }
-    public void setPrice(String price) { this.price = price; }
+    public String getPrice() { return price; } // SỬA LỖI: Trả về kiểu String
+    public void setPrice(String price) { this.price = price; } // SỬA LỖI: Tham số là String
 
     public double getDiscountPercentage() { return discountPercentage; }
     public void setDiscountPercentage(double discountPercentage) { this.discountPercentage = discountPercentage; }

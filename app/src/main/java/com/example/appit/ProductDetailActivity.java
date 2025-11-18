@@ -97,7 +97,10 @@ public class ProductDetailActivity extends AppCompatActivity {
 
         getSupportActionBar().setTitle(product.getTitle());
         textName.setText(product.getTitle());
-        textPrice.setText(product.getPrice() + " VND");
+
+        // SỬA LỖI: price bây giờ là String, hiển thị trực tiếp
+        textPrice.setText(product.getPrice());
+
         textDescription.setText(product.getDescription());
 
         if (product.getImages() != null && !product.getImages().isEmpty()) {
